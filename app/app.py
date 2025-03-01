@@ -380,11 +380,8 @@ if __name__ == "__main__":
     link = """[📚 Paper](https://arxiv.org/abs/2412.08486) - [🤖 Code](https://github.com/franciszzj/Leffa) - [🔥 Demo](https://huggingface.co/spaces/franciszzj/Leffa) - [🤗 Model](https://huggingface.co/franciszzj/Leffa)  
            
            """
-    news = """## News
-            - 09/Jan/2025. Inference defaults to float16, generating an image in 6 seconds (on A100).
-
-            More info can be found in the [GitHub repository](https://github.com/franciszzj/Leffa). Please leave a Star ⭐ if you like it!
-            """
+    news = """More info can be found in the [GitHub repository](https://github.com/franciszzj/Leffa). Please leave a Star ⭐ if you like it!
+           """
     description = "Leffa is a unified framework for controllable person image generation that enables precise manipulation of both appearance (i.e., virtual try-on) and pose (i.e., pose transfer)."
     note = "Note: The models used in the demo are trained solely on academic datasets. Virtual try-on uses VITON-HD/DressCode, and pose transfer uses DeepFashion."
 
@@ -483,8 +480,7 @@ if __name__ == "__main__":
 
                     def save_current_image(image):
                         if image is not None:
-                            return save_generated_image(image, "virtual_tryon")
-                        return None
+                            save_generated_image(image, "virtual_tryon")
                     
                     vt_gen_button.click(
                         fn=vt_generate,
@@ -571,11 +567,9 @@ if __name__ == "__main__":
                             height=256,
                         )
 
-                    # Move all click handlers to the end
                     def save_pt_image(image):
                         if image is not None:
-                            return save_generated_image(image, "pose_transfer")
-                        return None
+                            save_generated_image(image, "pose_transfer")
 
                     pose_transfer_gen_button.click(
                         fn=pt_generate,
@@ -599,8 +593,9 @@ if __name__ == "__main__":
      
         gr.HTML('<hr style="border: none; height: 1.5px; background: linear-gradient(to right, #a566b4, #74a781);margin: 5px 0;">')
         gr.Markdown(title)
-        gr.Markdown(note)
         gr.Markdown(description)
+        gr.Markdown(note)
         gr.Markdown(news)
         gr.Markdown(link)
+
         demo.launch(share=False, server_port=7860, allowed_paths=["./ckpts/examples"])
