@@ -1,6 +1,6 @@
 const path = require('path')
 module.exports = {
-  version: "3.2",
+  version: "3.6",
   title: "Leffa",
   description: "",
   icon: "icon.png",
@@ -73,6 +73,7 @@ module.exports = {
           icon: "fa-regular fa-circle-xmark",
           text: "Reset",
           href: "reset.js",
+          confirm: "Are you sure you wish to reset this app?",
         }]
       }
     } else {
