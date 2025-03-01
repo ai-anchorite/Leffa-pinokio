@@ -25,10 +25,10 @@ scikit-image
 scipy
 timm
 tokenizers
-torch
-torchaudio
+# torch
+# torchaudio
 torchmetrics
-torchvision
+# torchvision
 tqdm
 transformers
-triton
+# triton
