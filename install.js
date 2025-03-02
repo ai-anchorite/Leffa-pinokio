@@ -27,10 +27,17 @@ module.exports = {
         venv: "env",               
         path: "app",               
         message: [
-          "uv pip install gradio devicetorch",
           "uv pip install -r requirements.txt"
         ]
       }
-    }
+    },
+    
+    {
+      method: 'input',
+      params: {
+        title: 'Installation complete',
+        description: 'Click "Start" on the left sidebar to get start. Note that Leffa will download 20GB of models on first start. If downloads are interrupted, just start it again and it will continue.'
+      }
+    },
   ]
 }
