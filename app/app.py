@@ -7,6 +7,7 @@ import datetime
 from pathlib import Path
 import gc
 import warnings
+import sys  # Add this import at the top with the others
 
 # Suppress specific diffusers deprecation warnings
 warnings.filterwarnings('ignore', category=FutureWarning, module='diffusers.models.resnet')
@@ -30,8 +31,12 @@ from preprocess.humanparsing.run_parsing import Parsing
 from preprocess.openpose.run_openpose import OpenPose
 
 
-# Download checkpoints
-snapshot_download(repo_id="franciszzj/Leffa", local_dir="./ckpts")
+# Download base checkpoints (excluding pose transfer)
+snapshot_download(
+    repo_id="franciszzj/Leffa",
+    local_dir="./ckpts",
+    ignore_patterns=["*pose_transfer.pth"],  # Exclude pose transfer model
+)
 
 
 class LeffaPredictor(object):
@@ -138,11 +143,21 @@ class LeffaPredictor(object):
             print("DressCode model ready")
         
     def load_pose_transfer(self):
+        """Load pose transfer model, downloading if necessary"""
         # Only unload if we're switching from a different model
         if self.current_model and self.current_model != "pose_transfer":
             self.unload_all_models()
         
         if self.pt_inference is None:
+            if not os.path.exists("./ckpts/pose_transfer.pth"):
+                print("\nDownloading Pose Transfer model (20GB)...")
+                snapshot_download(
+                    repo_id="franciszzj/Leffa",
+                    local_dir="./ckpts",
+                    allow_patterns=["*pose_transfer.pth"],  # Only get pose transfer model
+                )
+                print("Download complete!")
+                
             print("Loading Pose Transfer model...")
             pt_model = LeffaModel(
                 pretrained_model_name_or_path="./ckpts/stable-diffusion-xl-1.0-inpainting-0.1",
@@ -333,6 +348,21 @@ def open_output_folder():
     except Exception as e:
         print(f"Failed to open folder: {str(e)}")
 
+def open_examples_folder(folder_type):
+    """Open the examples folder in the system's file explorer"""
+    example_dir = Path(f"./ckpts/examples/{folder_type}")
+    example_dir.mkdir(exist_ok=True, parents=True)
+    
+    try:
+        if os.name == 'nt':  # Windows
+            subprocess.run(['explorer', example_dir])
+        elif sys.platform == 'darwin':  # macOS
+            subprocess.run(['open', example_dir])
+        else:  # Linux
+            subprocess.run(['xdg-open', example_dir])
+    except Exception as e:
+        print(f"Failed to open folder: {str(e)}")
+
 # error handling for missing inputs
 def validate_vt_inputs(src_image, ref_image):
     """Validate inputs for virtual try-on"""
@@ -376,6 +406,9 @@ if __name__ == "__main__":
     person2_images = list_dir(f"{example_dir}/person2")
     garment_images = list_dir(f"{example_dir}/garment")
 
+    # a couple of newlines ensuring the launch URL appears on a clean line
+    print("\n\n")
+    
     title = "## Leffa: Learning Flow Fields in Attention for Controllable Person Image Generation"
     link = """[📚 Paper](https://arxiv.org/abs/2412.08486) - [🤖 Code](https://github.com/franciszzj/Leffa) - [🔥 Demo](https://huggingface.co/spaces/franciszzj/Leffa) - [🤗 Model](https://huggingface.co/franciszzj/Leffa)  
            
@@ -399,11 +432,14 @@ if __name__ == "__main__":
                     with gr.Row():
                         vt_open_folder = gr.Button("📂 Open Output Folder")   
                     with gr.Row():   
-                        gr.Examples(
-                            inputs=vt_src_image,
-                            examples_per_page=10,
-                            examples=person1_images,
-                        )
+                        with gr.Accordion("Person Examples", open=False) as person_accordion:
+                            gr.Examples(
+                                inputs=vt_src_image,
+                                examples_per_page=20,
+                                examples=person1_images,
+                            )
+                            person1_add_btn = gr.Button("➕ Add More [requires restart to appear]", size="sm")
+                            person1_add_btn.click(fn=lambda: open_examples_folder("person1"), inputs=[], outputs=[])
 
                 with gr.Column():
                     vt_ref_image = gr.Image(
@@ -417,11 +453,14 @@ if __name__ == "__main__":
                         label="Preprocess Garment Image (PNG only)",
                         value=False
                     )
-                    gr.Examples(
-                        inputs=vt_ref_image,
-                        examples_per_page=10,
-                        examples=garment_images,
-                    )
+                    with gr.Accordion("Garment Examples", open=False) as garment_accordion:
+                        gr.Examples(
+                            inputs=vt_ref_image,
+                            examples_per_page=20,
+                            examples=garment_images,
+                        )
+                        garment_add_btn = gr.Button("➕ Add More", size="sm")
+                        garment_add_btn.click(fn=lambda: open_examples_folder("garment"), inputs=[], outputs=[])
 
                 with gr.Column():
                     vt_gen_image = gr.Image(
@@ -443,7 +482,7 @@ if __name__ == "__main__":
                             value="viton_hd",
                         )
                         vt_garment_type = gr.Radio(
-                            label="Garment Type",
+                            label="Garment Type - lower/dress limited support",
                             choices=[("Upper", "upper_body"),
                                      ("Lower", "lower_body"),
                                      ("Dress", "dresses")],
@@ -512,11 +551,14 @@ if __name__ == "__main__":
                     with gr.Row():
                         pt_open_folder = gr.Button("📂 Open Output Folder")   
                     with gr.Row():    
-                        gr.Examples(
-                            inputs=pt_ref_image,
-                            examples_per_page=10,
-                            examples=person1_images,
-                        )
+                        with gr.Accordion("Person Examples", open=False) as pt_person_accordion:
+                            gr.Examples(
+                                inputs=pt_ref_image,
+                                examples_per_page=20,
+                                examples=person1_images,
+                            )
+                            pt_person1_add_btn = gr.Button("➕ Add More", size="sm")
+                            pt_person1_add_btn.click(fn=lambda: open_examples_folder("person1"), inputs=[], outputs=[])
                 with gr.Column():
                     pt_src_image = gr.Image(
                         sources=["upload"],
@@ -525,11 +567,20 @@ if __name__ == "__main__":
                         width=512,
                         height=512,
                     )
-                    gr.Examples(
-                        inputs=pt_src_image,
-                        examples_per_page=10,
-                        examples=person2_images,
+                    pt_status = gr.Textbox(
+                        value="⚠️ The 20GB model will download automatically on first use\n\n64GB RAM|16GB VRAM required. Check the [Hugging Face Demo](https://huggingface.co/spaces/franciszzj/Leffa) first!",
+                        label="Model Status",
+                        interactive=False,
+                        visible=not os.path.exists("./ckpts/pose_transfer.pth")
                     )
+                    with gr.Accordion("Pose Examples", open=False) as pose_accordion:
+                        gr.Examples(
+                            inputs=pt_src_image,
+                            examples_per_page=20,
+                            examples=person2_images,
+                        )
+                        pose_add_btn = gr.Button("➕ Add More", size="sm")
+                        pose_add_btn.click(fn=lambda: open_examples_folder("person2"), inputs=[], outputs=[])
                 with gr.Column():
                     pt_gen_image = gr.Image(
                         label="Generated Image",
