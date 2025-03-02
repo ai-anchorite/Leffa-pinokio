@@ -568,9 +568,9 @@ if __name__ == "__main__":
                         height=512,
                     )
                     pt_status = gr.Textbox(
-                        value="⚠️ The 20GB model will be downloaded on first use\n\nCheck the Hugging Face Demo results first!",
-                        label="Model Status",
-                        lines=3,
+                    value="⚠️ A 20GB model will be downloaded on first use\n⚠️ 64GB RAM | 16GB VRAM required!\n⬅️ Check terminal for progress\n⬇️ Hugging Face Demo link below to assess quality\n\n💣 This textbox will self-destruct on next start after download",
+                        label="Optional Pose model missing",
+                        lines=6,
                         interactive=False,
                         visible=not os.path.exists("./ckpts/pose_transfer.pth")
                     )
