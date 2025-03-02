@@ -264,7 +264,10 @@ def get_agnostic_mask_dc(model_parse, keypoint, category, size=(384, 512)):
 
     if category == 'dresses':
         label_cat = 7
-        parse_mask = (parse_array == 7).astype(np.float32) + \
+        parse_mask = (parse_array == 4).astype(np.float32) + \
+            (parse_array == 5).astype(np.float32) + \
+            (parse_array == 6).astype(np.float32) + \
+            (parse_array == 7).astype(np.float32) + \
             (parse_array == 12).astype(np.float32) + \
             (parse_array == 13).astype(np.float32)
         parser_mask_changeable += np.logical_and(
