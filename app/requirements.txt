@@ -1,34 +1,27 @@
-av
+diffusers==0.32.2
+gradio==5.20.0
+huggingface-hub==0.29.1
+numpy>=1.26.0
+onnxruntime>=1.16.0
+Pillow>=10.0.0
 accelerate
-config
+av
 cloudpickle
-diffusers
 einops
 fvcore
-gradio
-gradio-client
 imageio
 matplotlib
-numpy
 omegaconf
-onnxruntime
 opencv-python
 pandas
-pillow
 pycocotools
 pyyaml
 psutil
 peft
-regex==2024.5.15
+regex
 safetensors
 scikit-image
 scipy
 timm
 tokenizers
-# torch
-# torchaudio
-torchmetrics
-# torchvision
-tqdm
 transformers
-# triton
