@@ -568,8 +568,9 @@ if __name__ == "__main__":
                         height=512,
                     )
                     pt_status = gr.Textbox(
-                        value="⚠️ The 20GB model will download automatically on first use\n\n64GB RAM|16GB VRAM required. Check the [Hugging Face Demo](https://huggingface.co/spaces/franciszzj/Leffa) first!",
+                        value="⚠️ The 20GB model will be downloaded on first use\n\nCheck the Hugging Face Demo results first!",
                         label="Model Status",
+                        lines=3,
                         interactive=False,
                         visible=not os.path.exists("./ckpts/pose_transfer.pth")
                     )
